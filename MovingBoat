@@ -1,0 +1,176 @@
+#include <GL/glut.h>
+#include <stdio.h>
+#include <math.h>
+
+void circle(GLfloat rx, GLfloat ry, GLfloat cx, GLfloat cy) {
+    glBegin(GL_POLYGON);
+    for (int i = 0; i <= 360; i++) {
+        float angle = i * 3.1416 / 180;
+        float x = rx * cos(angle);
+        float y = ry * sin(angle);
+        glVertex2f((x + cx), (y + cy));
+    }
+    glEnd();
+}
+
+float boatShift = 0; // Variable to move the boat left and right
+float boatSpeed = 0.05;
+float cloudShift = 0; // Variable to move the clouds
+float wavePhase = 0; // Variable for wave animation
+
+void init(void) {
+    glClearColor(0.0, 0.9, 0.9, 0.0);
+    glMatrixMode(GL_PROJECTION);
+    gluOrtho2D(0, 500, 0, 500);
+}
+
+void clouds() {
+    glPushMatrix();
+    glTranslatef(cloudShift, 0, 0);
+
+    // 1st cloud
+    glColor3ub(255, 255, 255);
+    circle(20, 30, 460, 460);
+    circle(15, 20, 445, 460);
+    circle(15, 20, 475, 460);
+
+    // 2nd cloud
+    circle(20, 30, 390, 420);
+    circle(15, 20, 405, 420);
+    circle(15, 20, 375, 420);
+
+    glPopMatrix();
+}
+
+void waves() {
+    glPushMatrix();
+    glColor3ub(0, 191, 255);
+    glBegin(GL_QUADS);
+
+    for (int i = 0; i < 500; i += 10) {
+        float y = 5 * sin((i + wavePhase) * 0.1);
+        glVertex2f(i, 300 + y);
+        glVertex2f(i + 10, 300 + y);
+        glVertex2f(i + 10, 300);
+        glVertex2f(i, 300);
+    }
+
+    glEnd();
+    glPopMatrix();
+}
+
+void display(void) {
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    // River Color
+    glColor3ub(0, 191, 255);
+    glBegin(GL_POLYGON);
+    glVertex2d(0, 0);
+    glVertex2d(500, 0);
+    glVertex2d(500, 300);
+    glVertex2d(0, 300);
+    glEnd();
+
+    // Waves
+    waves();
+
+    // Boat design
+    glPushMatrix();
+    glTranslatef(boatShift, 0, 0);
+
+    glColor3ub(0, 0, 0);
+    glBegin(GL_POLYGON);
+    glVertex2d(325, 220);
+    glVertex2d(400, 220);
+    glVertex2d(425, 250);
+    glVertex2d(300, 250);
+    glEnd();
+
+    glColor3ub(205, 133, 63);
+    glBegin(GL_POLYGON);
+    glVertex2d(325, 250);
+    glVertex2d(400, 250);
+    glVertex2d(390, 280);
+    glVertex2d(335, 280);
+    glEnd();
+
+    glColor3ub(160, 82, 45);
+    glBegin(GL_POLYGON);
+    glVertex2d(360, 280);
+    glVertex2d(370, 280);
+    glVertex2d(370, 310);
+    glVertex2d(360, 310);
+    glEnd();
+
+    glColor3ub(34, 139, 34);
+    glBegin(GL_POLYGON);
+    glVertex2d(335, 290);
+    glVertex2d(390, 290);
+    glVertex2d(390, 375);
+    glVertex2d(335, 375);
+    glEnd();
+
+    glColor3ub(255, 0, 0);
+    circle(15, 20, 362, 330);
+
+    glPopMatrix();
+
+    // Thread (rope) to the boat
+    glColor3ub(0, 0, 0); // Black color for the thread
+    glBegin(GL_LINES);
+    glVertex2f(0, 300); // Fixed point on the shore
+    glVertex2f(325 + boatShift, 220); // Point on the boat
+    glEnd();
+
+    // Sun design
+    glColor3ub(255, 215, 0);
+    circle(25, 30, 175, 450);
+
+    // Clouds
+    clouds();
+
+    glFlush();
+    glutSwapBuffers();
+}
+
+void timer(int) {
+    // Update positions for animation
+    boatShift += boatSpeed;
+    if (boatShift > 500) boatShift = -200;
+
+    cloudShift -= 0.1;
+    if (cloudShift < -500) cloudShift = 0;
+
+    wavePhase += 0.1;
+    if (wavePhase > 360) wavePhase = 0;
+
+    glutPostRedisplay();
+    glutTimerFunc(16, timer, 0); // Approx 60 frames per second
+}
+
+void key(int key, int x, int y) {
+    switch (key) {
+    case GLUT_KEY_LEFT:
+        boatShift -= 5;
+        glutPostRedisplay();
+        break;
+    case GLUT_KEY_RIGHT:
+        boatShift += 5;
+        glutPostRedisplay();
+        break;
+    }
+}
+
+int main(int argc, char** argv) {
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
+    glutInitWindowSize(1000, 600);
+    glutInitWindowPosition(100, 100);
+    glutCreateWindow("A Moving Boat");
+    init();
+    glutDisplayFunc(display);
+    glutSpecialFunc(key);
+    glutTimerFunc(0, timer, 0);
+    glutMainLoop();
+    return 0;
+}
