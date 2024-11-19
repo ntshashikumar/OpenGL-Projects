@@ -7,8 +7,7 @@
 static double x=0.0,x1=0.0,y1=0.1,z1=0.0,a1=0,y2=0,z2=0;
 static double move=-60;
 static bool seperate=false;
-void
-stroke_output(GLfloat x, GLfloat y, char *format,...)
+void stroke_output(GLfloat x, GLfloat y, char *format,...)
 {
 va_list args;
 char buffer[200], *p;
