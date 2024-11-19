@@ -324,7 +324,7 @@ glEnable(GL_NORMALIZE);
 glutKeyboardFunc(mykey);
 glutCreateMenu(menu);
 glutAddMenuEntry("Launch       'p'",1);
-glutAddMenuEntry("Quit         'q'",5);
+glutAddMenuEntry("Quit            'q'",5);
 glutAttachMenu(GLUT_RIGHT_BUTTON);
 doInit();
 glutMainLoop();
