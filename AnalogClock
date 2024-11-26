@@ -1,0 +1,561 @@
+
+/**********************************Analogue Clock*********************************
+
+It is an openGL Computer Graphics project Created by Batch 8 
+UBDT College of Engineering
+
+Muralidhara H M (4UB21CS030)
+N B Shashank    (4UB21CS031)
+Nandish B S     (4UB21CS032)
+Nanditha P      (4UB21CS033)
+
+*********************************************************************************/
+
+/*Including the Libraries*/
+#include <stdio.h>
+#include <stdlib.h>
+#include <GL/glut.h>
+#include <math.h>
+#include <time.h>
+#include <windows.h>
+#include <string.h>
+
+// initializing time
+float seconds, minutes, hours;
+
+//initializing constants
+float clockradius = 0.98;
+float pi = (float)22 / 7;
+char text[] = "Project by Batch 8";
+
+// initializing colors
+GLfloat red[] = {1, 0, 0};
+GLfloat blue[] = {0, 0, 1};
+GLfloat green[] = {0, 1, 0};
+GLfloat aqua[] = {0, 1, 1};
+GLfloat purple[] = {1, 0, 1};
+GLfloat yellow[] = {1, 0.8, 0};
+GLfloat pink[] = {1, 0, (float)100 / 255};
+
+// initializing colors for components
+GLfloat *outerframe = red;
+GLfloat *numbers = red;
+GLfloat *hourhand = red;
+GLfloat *minhand = red;
+GLfloat *sechand = red;
+GLfloat *marks = red;
+GLfloat *points = red;
+GLfloat *pin = red;
+
+// initializing userdefined function
+static void myinit();
+static void menuFunction(int val);
+static void draw();
+static void drawHands();
+static void drawHourHand();
+static void drawMinuteHand();
+static void drawSecondsHand();
+static void recountTime();
+static void solidCircle(float radius);
+static void circle(float radius);
+static void clockBody();
+static void drawMarkings();
+static void drawPoints();
+static void alignNumbers();
+static void drawNumber(int num);
+static void a();
+static void b();
+static void c();
+static void d();
+static void e();
+static void f();
+static void g();
+static void h();
+
+// main function
+int main(int argc, char *argv[]){
+    // initializing glut in program
+    glutInit(&argc, argv);
+    glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
+
+    // creating window
+    glutInitWindowPosition(10, 10);
+    glutInitWindowSize(700, 700);
+    glutCreateWindow("Analogue Clock");
+
+    // logic of the program
+    myinit();
+    glutDisplayFunc(draw);
+    glutIdleFunc(recountTime);
+
+    // logic for menu
+    int outerframemenu = glutCreateMenu(menuFunction);
+    glutAddMenuEntry("RED", 11);
+    glutAddMenuEntry("GREEN", 12);
+    glutAddMenuEntry("BLUE", 13);
+    glutAddMenuEntry("AQUA", 14);
+    glutAddMenuEntry("PURPLE", 15);
+    glutAddMenuEntry("PINK", 16);
+    glutAddMenuEntry("YELLOW", 17);
+
+    int numbersmenu = glutCreateMenu(menuFunction);
+    glutAddMenuEntry("RED", 21);
+    glutAddMenuEntry("GREEN", 22);
+    glutAddMenuEntry("BLUE", 23);
+    glutAddMenuEntry("AQUA", 24);
+    glutAddMenuEntry("PURPLE", 25);
+    glutAddMenuEntry("PINK", 26);
+    glutAddMenuEntry("YELLOW", 27);
+
+    int hourhandmenu = glutCreateMenu(menuFunction);
+    glutAddMenuEntry("RED", 31);
+    glutAddMenuEntry("GREEN", 32);
+    glutAddMenuEntry("BLUE", 33);
+    glutAddMenuEntry("AQUA", 34);
+    glutAddMenuEntry("PURPLE", 35);
+    glutAddMenuEntry("PINK", 36);
+    glutAddMenuEntry("YELLOW", 37);
+
+    int minutehandmenu = glutCreateMenu(menuFunction);
+    glutAddMenuEntry("RED", 41);
+    glutAddMenuEntry("GREEN", 42);
+    glutAddMenuEntry("BLUE", 43);
+    glutAddMenuEntry("AQUA", 44);
+    glutAddMenuEntry("PURPLE", 45);
+    glutAddMenuEntry("PINK", 46);
+    glutAddMenuEntry("YELLOW", 47);
+
+    int secondshandmenu = glutCreateMenu(menuFunction);
+    glutAddMenuEntry("RED", 51);
+    glutAddMenuEntry("GREEN", 52);
+    glutAddMenuEntry("BLUE", 53);
+    glutAddMenuEntry("AQUA", 54);
+    glutAddMenuEntry("PURPLE", 55);
+    glutAddMenuEntry("PINK", 56);
+    glutAddMenuEntry("YELLOW", 57);
+
+    int marksmenu = glutCreateMenu(menuFunction);
+    glutAddMenuEntry("RED", 61);
+    glutAddMenuEntry("GREEN", 62);
+    glutAddMenuEntry("BLUE", 63);
+    glutAddMenuEntry("AQUA", 64);
+    glutAddMenuEntry("PURPLE", 65);
+    glutAddMenuEntry("PINK", 66);
+    glutAddMenuEntry("YELLOW", 67);
+
+    int pointsmenu = glutCreateMenu(menuFunction);
+    glutAddMenuEntry("RED", 71);
+    glutAddMenuEntry("GREEN", 72);
+    glutAddMenuEntry("BLUE", 73);
+    glutAddMenuEntry("AQUA", 74);
+    glutAddMenuEntry("PURPLE", 75);
+    glutAddMenuEntry("PINK", 76);
+    glutAddMenuEntry("YELLOW", 77);
+
+    int pinmenu = glutCreateMenu(menuFunction);
+    glutAddMenuEntry("RED", 81);
+    glutAddMenuEntry("GREEN", 82);
+    glutAddMenuEntry("BLUE", 83);
+    glutAddMenuEntry("AQUA", 84);
+    glutAddMenuEntry("PURPLE", 85);
+    glutAddMenuEntry("PINK", 86);
+    glutAddMenuEntry("YELLOW", 87);
+
+    int clockcolormenu = glutCreateMenu(menuFunction);
+    glutAddMenuEntry("RED", 01);
+    glutAddMenuEntry("GREEN", 02);
+    glutAddMenuEntry("BLUE", 03);
+    glutAddMenuEntry("AQUA", 04);
+    glutAddMenuEntry("PURPLE", 05);
+    glutAddMenuEntry("PINK", 06);
+    glutAddMenuEntry("YELLOW", 07);
+
+    glutCreateMenu(menuFunction);
+    glutAddSubMenu("CLOCK COLOR", clockcolormenu);
+    glutAddSubMenu("OUTER FRAME", outerframemenu);
+    glutAddSubMenu("NUMBERS", numbersmenu);
+    glutAddSubMenu("HOUR HAND", hourhandmenu);
+    glutAddSubMenu("MINUTE HAND", minutehandmenu);
+    glutAddSubMenu("SECONDS HAND", secondshandmenu);
+    glutAddSubMenu("MARKS", marksmenu);
+    glutAddSubMenu("POINTS", pointsmenu);
+    glutAddSubMenu("PIN", pinmenu);
+    glutAttachMenu(GLUT_RIGHT_BUTTON);
+
+    glutMainLoop();
+    return 0;
+}
+
+// logic for myinit function
+void myinit(){
+    glClearColor((float)10 / 255, (float)10 / 255, (float)10 / 255, 1);
+    glColor4f(1, 1, 1, 1);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+}
+
+//logic for menu function
+void menuFunction(int val){
+    int color = val % 10;
+    int component = val/10;
+    GLfloat* colorlist[] = {nullptr,red,green,blue,aqua,purple,pink,yellow};
+
+    switch (component)
+    {
+    case 1: outerframe = colorlist[color];
+        break;
+    case 2: numbers = colorlist[color];
+        break;
+    case 3: hourhand = colorlist[color];
+        break;
+    case 4: minhand = colorlist[color];
+        break;
+    case 5: sechand = colorlist[color];
+        break;
+    case 6: marks = colorlist[color];
+        break;
+    case 7: points = colorlist[color];
+        break;
+    case 8: pin = colorlist[color];
+        break;
+    case 0: outerframe = numbers = marks = points = pin = colorlist[color];
+            hourhand = minhand = sechand = colorlist[color];
+    default:
+        break;
+    }
+}
+
+// logic for draw funciton
+void draw(){
+    //clearbuffers and set default
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glLoadIdentity();
+
+    //drawing clock's body and drawing hands
+    clockBody();
+    drawHands();
+
+    // logic for pin
+    glColor4f(pin[0], pin[1], pin[2], 0.2);
+    solidCircle(0.035);
+    glColor4f(pin[0], pin[1], pin[2], 0.5);
+    solidCircle(0.03);
+    glColor4f(pin[0], pin[1], pin[2], 0.8);
+    solidCircle(0.025);
+    glColor4f(1, 1, 1, 1);
+    solidCircle(0.02);
+
+    //for writing the text
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluOrtho2D(-1.0, 1.0, -1.0, 1.0);
+    glColor3f(1, 1, 1);
+    glRasterPos2f(-0.95,-0.95);
+    for(int i=0;i<strlen(text);i++){
+        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, text[i]);
+    }
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+
+    glutSwapBuffers();
+}
+
+// logic for hands
+void drawHands(){
+    // drawing hour hand
+    glLineWidth(20);
+    glColor4f(hourhand[0], hourhand[1], hourhand[2], 0.3);
+    drawHourHand();
+    glLineWidth(16);
+    glColor4f(hourhand[0], hourhand[1], hourhand[2], 0.4);
+    drawHourHand();
+    glLineWidth(10);
+    glColor4f(hourhand[0], hourhand[1], hourhand[2], 0.8);
+    drawHourHand();
+    glLineWidth(7);
+    glColor4f(1, 1, 1, 1);
+    drawHourHand();
+
+    // drawing minute hand
+    glLineWidth(12);
+    glColor4f(minhand[0], minhand[1], minhand[2], 0.3);
+    drawMinuteHand();
+    glLineWidth(10);
+    glColor4f(minhand[0], minhand[1], minhand[2], 0.4);
+    drawMinuteHand();
+    glLineWidth(5);
+    glColor4f(minhand[0], minhand[1], minhand[2], 0.8);
+    drawMinuteHand();
+    glLineWidth(3);
+    glColor4f(1, 1, 1, 1);
+    drawMinuteHand();
+
+    // drawing second hand
+    glLineWidth(8);
+    glColor4f(sechand[0], sechand[1], sechand[2], 0.5);
+    drawSecondsHand();
+    glLineWidth(6);
+    glColor4f(sechand[0], sechand[1], sechand[2], 0.7);
+    drawSecondsHand();
+    glLineWidth(4);
+    glColor4f(sechand[0], sechand[1], sechand[2], 0.9);
+    drawSecondsHand();
+    glLineWidth(2);
+    glColor4f(1, 1, 1, 1);
+    drawSecondsHand();
+}
+
+//logic for seconds hand
+void drawSecondsHand(){
+    float rad = (seconds - 1) * 6 * (pi / 180);
+    glBegin(GL_LINES);
+    glVertex2f(0.1 * sin(rad + pi), 0.1 * cos(rad + pi));
+    glVertex2f(0.75 * sin(rad), 0.75 * cos(rad));
+    glEnd();
+}
+
+//logic for minute hand
+void drawMinuteHand(){
+    float rad = minutes * 6 * (pi / 180);
+    glBegin(GL_LINES);
+    glVertex2f(0.05 * sin(rad + pi), 0.05 * cos(rad + pi));
+    glVertex2f(0.65 * sin(rad), 0.65 * cos(rad));
+    glEnd();
+}
+
+//logic for hour hand
+void drawHourHand(){
+    float rad = hours * 30 * (pi / 180);
+    glBegin(GL_LINES);
+    glVertex2d(0, 0);
+    glVertex2f(0.5 * sin(rad), 0.5 * cos(rad));
+    glEnd();
+}
+
+// logic for drawing solid circle
+void solidCircle(float radius){
+    glBegin(GL_POLYGON);
+    float theta, rad;
+    for (theta = 0; theta <= 360; theta = theta + 0.01)
+    {
+        rad = theta * (pi / 180);
+        glVertex2f(radius * cos(rad), radius * sin(rad));
+    }
+    glEnd();
+    glFlush();
+}
+
+// logic for drawing circle
+void circle(float radius){
+    glBegin(GL_LINE_LOOP);
+    float theta, rad;
+    for (theta = 0; theta <= 360; theta = theta + 1)
+    {
+        rad = theta * (pi * 180);
+        glVertex2f(radius * cos(rad), radius * sin(rad));
+    }
+    glEnd();
+}
+
+// logic for recounting the time
+void recountTime(){
+    time_t now = time(NULL);
+
+    struct tm *cur_time = localtime(&now);
+    seconds = (float)cur_time->tm_sec;
+    minutes = (float)(cur_time->tm_min + (float)(seconds / 60));
+    hours = (float)(cur_time->tm_hour % 12 + (float)(minutes / 60));
+
+    glutPostRedisplay();
+}
+
+// logic for drawing markings
+void drawMarkings(){
+    float theta, rad;
+    for (theta = 0; theta < 360; theta = theta + 30)
+    {
+        rad = theta * (pi / 180);
+        glBegin(GL_LINES);
+        glVertex2f((clockradius)*sin(rad), (clockradius)*cos(rad));
+        glVertex2f((clockradius - 0.05) * sin(rad), (clockradius - 0.05) * cos(rad));
+        glEnd();
+    }
+}
+
+// logic for drawing points
+void drawPoints(){
+    int theta;
+    float rad;
+    for (theta = 0; theta <= 360; theta = theta + 6)
+    {
+        if (theta % 30 != 0)
+        {
+            rad = theta * (pi / 180);
+            glBegin(GL_POINTS);
+            glVertex2f((clockradius - 0.035) * sin(rad), (clockradius - 0.035) * cos(rad));
+            glEnd();
+        }
+    }
+}
+
+// logic for clock body
+void clockBody(){
+    // drawing markings
+    glLineWidth(10);
+    glColor4f(marks[0], marks[1], marks[2], 0.2);
+    drawMarkings();
+    glLineWidth(7);
+    glColor4f(marks[0], marks[1], marks[2], 0.5);
+    drawMarkings();
+    glLineWidth(3);
+    glColor4f(marks[0], marks[1], marks[2], 0.8);
+    drawMarkings();
+    glLineWidth(2);
+    glColor4f(1, 1, 1, 1);
+    drawMarkings();
+
+    // drawing points
+    glPointSize(8);
+    glColor4f(points[0], points[1], points[2], 0.2);
+    drawPoints();
+    glPointSize(6);
+    glColor4f(points[0], points[1], points[2], 0.5);
+    drawPoints();
+    glPointSize(4);
+    glColor4f(points[0], points[1], points[2], 0.8);
+    drawPoints();
+    glPointSize(3);
+    glColor4f(1, 1, 1, 1);
+    drawPoints();
+
+    // clockframe
+    glLineWidth(12);
+    glColor4f(outerframe[0], outerframe[1], outerframe[2], 0.05);
+    circle(clockradius);
+    glLineWidth(8);
+    glColor4f(outerframe[0], outerframe[1], outerframe[2], 0.09);
+    circle(clockradius);
+    glLineWidth(4);
+    glColor4f(outerframe[0], outerframe[1], outerframe[2], 0.5);
+    circle(clockradius);
+    glLineWidth(2);
+    glColor4f(1.0, 1.0, 1.0, 1.0);
+    circle(clockradius);
+
+    // drawing numbers
+    glLineWidth(10);
+    glColor4f(numbers[0], numbers[1], numbers[2], 0.2);
+    alignNumbers();
+    glLineWidth(7);
+    glColor4f(numbers[0], numbers[1], numbers[2], 0.5);
+    alignNumbers();
+    glLineWidth(5);
+    glColor4f(numbers[0], numbers[1], numbers[2], 0.8);
+    alignNumbers();
+    glLineWidth(2);
+    glColor4f(1, 1, 1, 1);
+    alignNumbers();
+}
+
+// logic for positioning the numbers
+void alignNumbers(){
+    float theta, rad;
+    int num;
+
+    for (num = 1; num <= 12; num++)
+    {
+        theta = num * 30;
+        rad = theta * (pi / 180);
+        glTranslatef((clockradius - 0.17) * sin(rad), (clockradius - 0.17) * cos(rad), 0);
+        glScalef(0.07, 0.07, 0);
+        drawNumber(num);
+        glLoadIdentity();
+    }
+}
+
+// logic for drawing the numbers
+void drawNumber(int num){
+
+    glBegin(GL_LINES);
+    switch (num){
+    case 1: b();e();
+        break;
+    case 2: a(); b(); c(); g(); f();
+        break;
+    case 3: a(); b(); c(); e(); f();
+        break;
+    case 4: d(); c(); b(); e();
+        break;
+    case 5: a(); d(); c(); e(); f();
+        break;
+    case 6: a(); d(); g(); f(); e(); c();
+        break;
+    case 7: a(); b(); e();
+        break;
+    case 8: a(); b(); c(); d(); e(); f(); g();
+        break;
+    case 9: a(); b(); c(); d(); e(); f();
+        break;
+    case 10: h(); a(); d(); g(); f(); e(); b();
+        break;
+    case 11: h(); b(); e();
+        break;
+    case 12: a(); b(); c(); g(); f(); h();
+        break;
+    default:
+        break;
+    }
+    glEnd();
+}
+
+/*
+LED's for drawing the numbers
+      ______
+|    |   a  |
+|   d|______|b
+|h   |   c  |
+|   f|______|e
+        g
+*/
+
+void a(){
+    glVertex2f(-0.4, 1);
+    glVertex2f(0.4, 1);
+}
+
+void b(){
+    glVertex2f(0.5, 0.9);
+    glVertex2f(0.5, 0.1);
+}
+
+void c(){
+    glVertex2f(-0.4, 0);
+    glVertex2f(0.4, 0);
+}
+
+void d(){
+    glVertex2f(-0.5, 0.9);
+    glVertex2f(-0.5, 0.1);
+}
+
+void e(){
+    glVertex2f(0.5, -0.9);
+    glVertex2f(0.5, -0.1);
+}
+
+void f(){
+    glVertex2f(-0.4, -1);
+    glVertex2f(0.4, -1);
+}
+
+void g(){
+    glVertex2f(-0.5, -0.9);
+    glVertex2f(-0.5, -0.1);
+}
+
+void h(){
+    glVertex2f(-1, 0.9);
+    glVertex2f(-1, 0.1);
+    glVertex2f(-1, -0.9);
+    glVertex2f(-1, -0.1);
+}
